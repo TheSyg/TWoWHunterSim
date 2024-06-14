@@ -153,6 +153,7 @@ fight_duration = 120 # Fight Duration
 ########################
 # Discord: syg_
 ########################
+
 hunter = Hunter(min_damage, max_damage, weapon_speed, attack_speed, ranged_attack_power, scope_bonus, ammo_dps, crit_chance)
 
 dps = hunter.simulate_combat(fight_duration)
