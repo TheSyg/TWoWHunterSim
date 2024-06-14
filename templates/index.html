@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter DPS Simulator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Hunter DPS Simulator</h1>
+    <form id="simulator-form">
+        <label for="min_damage">Min Damage:</label>
+        <input type="number" id="min_damage" name="min_damage" required>
+        <label for="max_damage">Max Damage:</label>
+        <input type="number" id="max_damage" name="max_damage" required>
+        <label for="weapon_speed">Weapon Speed:</label>
+        <input type="number" step="0.1" id="weapon_speed" name="weapon_speed" required>
+        <label for="attack_speed">Attack Speed:</label>
+        <input type="number" step="0.1" id="attack_speed" name="attack_speed" required>
+        <label for="ranged_attack_power">Ranged Attack Power:</label>
+        <input type="number" id="ranged_attack_power" name="ranged_attack_power" required>
+        <label for="scope_bonus">Scope Bonus:</label>
+       
