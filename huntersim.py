@@ -137,6 +137,7 @@ class Hunter:
         dps = total_damage / duration
         return dps
 
+########################
 # Sim parameters
 # Only modify this
 ########################
@@ -149,9 +150,9 @@ scope_bonus = 7 # Weapon's enchant. Type 0 if using Biznick's.
 ammo_dps = 17.5 # Ammo DPS
 crit_chance = 24.87  # Crit Chance
 fight_duration = 120 # Fight Duration
-#########################
+########################
 # Discord: syg_
-#########################
+########################
 hunter = Hunter(min_damage, max_damage, weapon_speed, attack_speed, ranged_attack_power, scope_bonus, ammo_dps, crit_chance)
 
 dps = hunter.simulate_combat(fight_duration)
