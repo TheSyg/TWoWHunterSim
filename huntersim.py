@@ -1,5 +1,11 @@
 import random
 
+##################
+# TWoW Hunter Sim. WIP.
+# Discord: syg_
+# Feedback is welcomed.
+##################
+
 class Hunter:
     def __init__(self, min_damage, max_damage, weapon_speed, attack_speed, ranged_attack_power, scope_bonus, ammo_dps, crit_chance):
         self.min_damage = min_damage
@@ -26,7 +32,7 @@ class Hunter:
         self.multi_shot_last_used = -self.multi_shot_cd
         self.trueshot_cast_time = 1.0  
         self.time_until_next_auto = attack_speed 
-        self.trueshot_used = False 
+        self.skill_used = False # checks if either multi-shot or trueshot was used
 
     def calculate_damage_range(self):
         min_range = (((self.min_damage + self.scope_bonus) / self.weapon_speed) + (self.ranged_attack_power / 14) + self.ammo_dps) * self.weapon_speed
@@ -34,6 +40,7 @@ class Hunter:
         return min_range, max_range
 
     def calculate_shot_damage(self, trueshot=False, multi_shot=False):
+        # AA logic
         min_range, max_range = self.calculate_damage_range()
         damage = random.uniform(min_range, max_range)
         if trueshot:
@@ -41,29 +48,32 @@ class Hunter:
         if multi_shot:
             damage += self.multi_shot_bonus
         if random.random() < self.crit_chance:
-            damage *= 2  # Doble daño en crítico
+            damage *= 2.3 # Crits!
         return damage
 
     def apply_quick_shots(self):
+        # QS Proc logic
         if random.random() < self.quick_shots_chance:
             self.quick_shots_active = True
             self.quick_shots_time_left = self.quick_shots_duration
-            self.attack_speed *= 0.7  # Incremento del 30% en la velocidad de ataque
+            self.attack_speed *= 0.7
             self.time_until_next_auto *= 0.7
 
     def update_quick_shots(self, elapsed_time):
         if self.quick_shots_active:
             self.quick_shots_time_left -= elapsed_time
             if self.quick_shots_time_left <= 0:
+                # QS is over
                 self.quick_shots_active = False
-                self.attack_speed = self.base_attack_speed  # Revertir la velocidad de ataque al valor base
+                self.attack_speed = self.base_attack_speed 
                 self.time_until_next_auto = self.base_attack_speed
 
     def apply_rapid_fire(self, current_time):
+        # Activates RF
         if current_time - self.rapid_fire_last_used >= self.rapid_fire_cd:
             self.rapid_fire_active = True
             self.rapid_fire_time_left = self.rapid_fire_duration
-            self.attack_speed *= 0.6  # Incremento del 40% en la velocidad de ataque
+            self.attack_speed *= 0.6 
             self.time_until_next_auto *= 0.6
             self.rapid_fire_last_used = current_time
 
@@ -71,70 +81,78 @@ class Hunter:
         if self.rapid_fire_active:
             self.rapid_fire_time_left -= elapsed_time
             if self.rapid_fire_time_left <= 0:
+                # RF is over
                 self.rapid_fire_active = False
-                self.attack_speed = self.base_attack_speed  # Revertir la velocidad de ataque al valor base
+                self.attack_speed = self.base_attack_speed 
                 self.time_until_next_auto = self.base_attack_speed
 
     def simulate_combat(self, duration):
         total_damage = 0
         time = 0
         while time < duration:
-            # Activar Rapid Fire si es posible
+            # Turns on RF Asap
             self.apply_rapid_fire(time)
             
-            # Aplicar Quick Shots
-            self.apply_quick_shots()
+            # self.apply_quick_shots()
 
-            if time - self.multi_shot_last_used >= self.multi_shot_cd and not self.trueshot_used:
+            if time - self.multi_shot_last_used >= self.multi_shot_cd and not self.skill_used:
                 # Multi-Shot
                 damage = self.calculate_shot_damage(multi_shot=True)
                 total_damage += damage
                 self.multi_shot_last_used = time
-                elapsed_time = 0  # No tiene tiempo de casteo
-                self.trueshot_used = True  # Marcar Multi-Shot como una habilidad usada
+                elapsed_time = 0.5 
+                self.skill_used = True  # Used Trueshot or Multi-Shot
+                self.apply_quick_shots()
                 print(f"Time: {time:.2f}s - Multi-Shot - Damage: {damage:.2f}")
             elif self.time_until_next_auto <= 0:
-                # Auto Disparo
+                # Auto-Shot
                 damage = self.calculate_shot_damage()
                 total_damage += damage
                 elapsed_time = self.attack_speed
                 self.time_until_next_auto = self.attack_speed
-                self.trueshot_used = False  # Resetear el uso de Trueshot
+                self.skill_used = False  # Resets Skill
+                self.apply_quick_shots()
                 print(f"Time: {time:.2f}s - Auto Shot - Damage: {damage:.2f}")
-            elif not self.trueshot_used and not (self.quick_shots_active and self.rapid_fire_active):
-                # Trueshot (solo si ambos buffs no están activos)
+            elif not self.skill_used and not (self.quick_shots_active and self.rapid_fire_active):
+                # Trueshot (won't trigger if both QS and RF are active)
                 damage = self.calculate_shot_damage(trueshot=True)
                 total_damage += damage
                 elapsed_time = self.trueshot_cast_time
                 self.time_until_next_auto -= self.trueshot_cast_time
-                self.trueshot_used = True  # Marcar Trueshot como usado
+                self.skill_used = True  # Used Trueshot or Multi-Shot
+                self.apply_quick_shots()
                 print(f"Time: {time:.2f}s - Trueshot - Damage: {damage:.2f}")
             else:
-                # Esperar al siguiente auto disparo
+                # Waits for the next Auto-Shot
                 elapsed_time = self.time_until_next_auto
                 self.time_until_next_auto = 0
             
             time += elapsed_time
             
-            # Actualizar estado de Quick Shots
+            # Updates QS
             self.update_quick_shots(elapsed_time)
-            # Actualizar estado de Rapid Fire
+            # Updates RF
             self.update_rapid_fire(elapsed_time)
         
         dps = total_damage / duration
         return dps
 
-# Datos a simular
-min_damage = 103
-max_damage = 192
-weapon_speed = 3
-attack_speed = 2.61  # Velocidad de ataque del cazador
-ranged_attack_power = 1524
-scope_bonus = 7
-ammo_dps = 17.5
-crit_chance = 24.87  # Porcentaje de golpe crítico
-
+# Sim parameters
+# Only modify this
+########################
+min_damage = 103 # Weapon's min damage
+max_damage = 192 # Weapon's max damage
+weapon_speed = 3 # Weapon's Attack Speed
+attack_speed = 2.61  # Hunter Attack Speed
+ranged_attack_power = 1524 # Hunter Attack Power
+scope_bonus = 7 # Weapon's enchant. Type 0 if using Biznick's.
+ammo_dps = 17.5 # Ammo DPS
+crit_chance = 24.87  # Crit Chance
+fight_duration = 120 # Fight Duration
+#########################
+# Discord: syg_
+#########################
 hunter = Hunter(min_damage, max_damage, weapon_speed, attack_speed, ranged_attack_power, scope_bonus, ammo_dps, crit_chance)
 
-dps = hunter.simulate_combat(120)  # Simulación de combate durante 300 segundos
+dps = hunter.simulate_combat(fight_duration)
 print(f"DPS: {dps:.2f}")
