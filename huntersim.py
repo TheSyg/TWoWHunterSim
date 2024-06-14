@@ -55,10 +55,16 @@ class Hunter:
         # QS Proc logic
         if random.random() < self.quick_shots_chance:
             print("QS Triggered!")
-            self.quick_shots_active = True
-            self.quick_shots_time_left = self.quick_shots_duration
-            self.attack_speed *= 0.7
-            self.time_until_next_auto *= 0.7
+            if self.quick_shots_active == True:
+                # QS already active, refreshes duration
+                self.quick_shots_active = True
+                self.quick_shots_time_left = self.quick_shots_duration
+            else:
+                # QS was not active. Buffs Attack Speed, adds duration.
+                self.quick_shots_active = True
+                self.quick_shots_time_left = self.quick_shots_duration
+                self.attack_speed *= 0.7
+                self.time_until_next_auto *= 0.7
 
     def update_quick_shots(self, elapsed_time):
         if self.quick_shots_active:
@@ -66,8 +72,8 @@ class Hunter:
             if self.quick_shots_time_left <= 0:
                 # QS is over
                 self.quick_shots_active = False
-                self.attack_speed = self.base_attack_speed 
-                self.time_until_next_auto = self.base_attack_speed
+                self.attack_speed = self.attack_speed / 0.7 # reverts Attack Speed
+                self.time_until_next_auto = self.attack_speed
 
     def apply_rapid_fire(self, current_time):
         # Activates RF
@@ -84,8 +90,8 @@ class Hunter:
             if self.rapid_fire_time_left <= 0:
                 # RF is over
                 self.rapid_fire_active = False
-                self.attack_speed = self.base_attack_speed 
-                self.time_until_next_auto = self.base_attack_speed
+                self.attack_speed = self.attack_speed / 0.6 # reverts Attack Speed
+                self.time_until_next_auto = self.attack_speed
 
     def simulate_combat(self, duration):
         total_damage = 0
@@ -93,9 +99,7 @@ class Hunter:
         while time < duration:
             # Turns on RF Asap
             self.apply_rapid_fire(time)
-            
-            # self.apply_quick_shots()
-
+    
             if time - self.multi_shot_last_used >= self.multi_shot_cd and not self.skill_used:
                 # Multi-Shot
                 damage = self.calculate_shot_damage(multi_shot=True)
