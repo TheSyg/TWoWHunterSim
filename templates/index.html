@@ -20,4 +20,39 @@
         <label for="ranged_attack_power">Ranged Attack Power:</label>
         <input type="number" id="ranged_attack_power" name="ranged_attack_power" required>
         <label for="scope_bonus">Scope Bonus:</label>
-       
+        <input type="number" id="scope_bonus" name="scope_bonus" required>
+        <label for="ammo_dps">Ammo DPS:</label>
+        <input type="number" id="ammo_dps" name="ammo_dps" required>
+        <label for="crit_chance">Crit Chance:</label>
+        <input type="number" step="0.1" id="crit_chance" name="crit_chance" required>
+        <label for="duration">Duration (seconds):</label>
+        <input type="number" id="duration" name="duration" required>
+        <button type="submit">Simulate</button>
+    </form>
+    <div id="result"></div>
+    <script>
+        document.getElementById('simulator-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = isNaN(value) ? value : parseFloat(value);
+            });
+            fetch('/simulate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                document.getElementById('result').innerText = `DPS: ${result.dps.toFixed(2)}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
