@@ -54,6 +54,7 @@ class Hunter:
     def apply_quick_shots(self):
         # QS Proc logic
         if random.random() < self.quick_shots_chance:
+            print("QS Triggered!")
             self.quick_shots_active = True
             self.quick_shots_time_left = self.quick_shots_duration
             self.attack_speed *= 0.7
@@ -100,7 +101,7 @@ class Hunter:
                 damage = self.calculate_shot_damage(multi_shot=True)
                 total_damage += damage
                 self.multi_shot_last_used = time
-                elapsed_time = 0.5 
+                elapsed_time = 0.5
                 self.skill_used = True  # Used Trueshot or Multi-Shot
                 self.apply_quick_shots()
                 print(f"Time: {time:.2f}s - Multi-Shot - Damage: {damage:.2f}")
