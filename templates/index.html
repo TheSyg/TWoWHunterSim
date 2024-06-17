@@ -10,23 +10,32 @@
     <h1>Hunter DPS Simulator</h1>
     <form id="simulator-form">
         <label for="min_damage">Min Damage:</label>
-        <input type="number" id="min_damage" name="min_damage" required>
+        <input type="number" step="0.1" id="min_damage" name="min_damage" min="0" required>
+        
         <label for="max_damage">Max Damage:</label>
-        <input type="number" id="max_damage" name="max_damage" required>
+        <input type="number" step="0.1" id="max_damage" name="max_damage" min="0" required>
+        
         <label for="weapon_speed">Weapon Speed:</label>
-        <input type="number" step="0.1" id="weapon_speed" name="weapon_speed" required>
+        <input type="number" step="0.1" id="weapon_speed" name="weapon_speed" min="0" required>
+        
         <label for="attack_speed">Attack Speed:</label>
-        <input type="number" step="0.1" id="attack_speed" name="attack_speed" required>
+        <input type="number" step="0.1" id="attack_speed" name="attack_speed" min="0" required>
+        
         <label for="ranged_attack_power">Ranged Attack Power:</label>
-        <input type="number" id="ranged_attack_power" name="ranged_attack_power" required>
+        <input type="number" step="0.1" id="ranged_attack_power" name="ranged_attack_power" min="0" required>
+        
         <label for="scope_bonus">Scope Bonus:</label>
-        <input type="number" id="scope_bonus" name="scope_bonus" required>
+        <input type="number" step="0.1" id="scope_bonus" name="scope_bonus" min="0" required>
+        
         <label for="ammo_dps">Ammo DPS:</label>
-        <input type="number" id="ammo_dps" name="ammo_dps" required>
+        <input type="number" step="0.1" id="ammo_dps" name="ammo_dps" min="0" required>
+        
         <label for="crit_chance">Crit Chance:</label>
-        <input type="number" step="0.1" id="crit_chance" name="crit_chance" required>
+        <input type="number" step="0.1" id="crit_chance" name="crit_chance" min="0" required>
+        
         <label for="duration">Duration (seconds):</label>
-        <input type="number" id="duration" name="duration" required>
+        <input type="number" step="0.1" id="duration" name="duration" min="0" required>
+        
         <button type="submit">Simulate</button>
     </form>
     <div id="result"></div>
@@ -38,6 +47,15 @@
             formData.forEach((value, key) => {
                 data[key] = isNaN(value) ? value : parseFloat(value);
             });
+
+            // Ensure no negative values
+            for (const key in data) {
+                if (data[key] < 0) {
+                    alert('Please enter non-negative values only.');
+                    return;
+                }
+            }
+
             fetch('/simulate', {
                 method: 'POST',
                 headers: {
