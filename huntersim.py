@@ -19,22 +19,23 @@ class Hunter:
         self.crit_chance = crit_chance / 100
         self.trueshot_bonus = 50
         self.multi_shot_bonus = 172
-        self.quick_shots_duration = 12
+        self.quick_shots_duration = 12 # in seconds
         self.quick_shots_chance = 0.05
         self.quick_shots_active = False
-        self.quick_shots_time_left = 0
+        self.quick_shots_time_left = 0 # dynamic paramter
         self.rapid_fire_cd = 300  
         self.rapid_fire_duration = 15 
         self.rapid_fire_active = False
         self.rapid_fire_time_left = 0
         self.rapid_fire_last_used = -self.rapid_fire_cd 
-        self.multi_shot_cd = 10  
+        self.multi_shot_cd = 10  # IN SECONDS
         self.multi_shot_last_used = -self.multi_shot_cd
         self.trueshot_cast_time = 1.0  
         self.time_until_next_auto = attack_speed 
         self.skill_used = False # checks if either multi-shot or trueshot was used
 
     def calculate_damage_range(self):
+        # ranges
         min_range = (((self.min_damage + self.scope_bonus) / self.weapon_speed) + (self.ranged_attack_power / 14) + self.ammo_dps) * self.weapon_speed
         max_range = (((self.max_damage + self.scope_bonus) / self.weapon_speed) + (self.ranged_attack_power / 14) + self.ammo_dps) * self.weapon_speed
         return min_range, max_range
@@ -43,6 +44,7 @@ class Hunter:
         # AA logic
         min_range, max_range = self.calculate_damage_range()
         damage = random.uniform(min_range, max_range)
+        
         if trueshot:
             damage += self.trueshot_bonus
         if multi_shot:
@@ -52,7 +54,7 @@ class Hunter:
         return damage
 
     def apply_quick_shots(self):
-        # QS Proc logic
+        # QS Proc logic, Imp Aspect of the Hawk
         if random.random() < self.quick_shots_chance:
             print("QS Triggered!")
             if self.quick_shots_active == True:
@@ -63,10 +65,11 @@ class Hunter:
                 # QS was not active. Buffs Attack Speed, adds duration.
                 self.quick_shots_active = True
                 self.quick_shots_time_left = self.quick_shots_duration
-                self.attack_speed *= 0.7
+                self.attack_speed *= 0.7 # 30% 
                 self.time_until_next_auto *= 0.7
 
     def update_quick_shots(self, elapsed_time):
+        # QS Logic
         if self.quick_shots_active:
             self.quick_shots_time_left -= elapsed_time
             if self.quick_shots_time_left <= 0:
@@ -80,11 +83,12 @@ class Hunter:
         if current_time - self.rapid_fire_last_used >= self.rapid_fire_cd:
             self.rapid_fire_active = True
             self.rapid_fire_time_left = self.rapid_fire_duration
-            self.attack_speed *= 0.6 
-            self.time_until_next_auto *= 0.6
+            self.attack_speed *= 0.6 # 40% AS increase
+            self.time_until_next_auto *= 0.6 
             self.rapid_fire_last_used = current_time
 
     def update_rapid_fire(self, elapsed_time):
+        # RF logic
         if self.rapid_fire_active:
             self.rapid_fire_time_left -= elapsed_time
             if self.rapid_fire_time_left <= 0:
@@ -99,7 +103,6 @@ class Hunter:
         while time < duration:
             # Turns on RF Asap
             self.apply_rapid_fire(time)
-    
             if time - self.multi_shot_last_used >= self.multi_shot_cd and not self.skill_used:
                 # Multi-Shot
                 damage = self.calculate_shot_damage(multi_shot=True)
@@ -149,17 +152,26 @@ class Hunter:
 min_damage = 103 # Weapon's min damage
 max_damage = 192 # Weapon's max damage
 weapon_speed = 3 # Weapon's Attack Speed
-attack_speed = 2.61  # Hunter Attack Speed
-ranged_attack_power = 1524 # Hunter Attack Power
+attack_speed = 2.57  # Hunter Attack Speed
+ranged_attack_power = 1518 # Hunter Attack Power
 scope_bonus = 7 # Weapon's enchant. Type 0 if using Biznick's.
 ammo_dps = 17.5 # Ammo DPS
-crit_chance = 24.87  # Crit Chance
-fight_duration = 120 # Fight Duration
+crit_chance = 27.51  # Crit Chance
+fight_duration = 120 # Fight Duration in seconds
+
 ########################
 # Discord: syg_
 ########################
 
-hunter = Hunter(min_damage, max_damage, weapon_speed, attack_speed, ranged_attack_power, scope_bonus, ammo_dps, crit_chance)
+hunter = Hunter(
+    min_damage, 
+    max_damage, 
+    weapon_speed, 
+    attack_speed, 
+    ranged_attack_power, 
+    scope_bonus, 
+    ammo_dps, 
+    crit_chance)
 
 dps = hunter.simulate_combat(fight_duration)
 print(f"DPS: {dps:.2f}")

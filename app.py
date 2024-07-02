@@ -44,7 +44,7 @@ class Hunter:
         if multi_shot:
             damage += self.multi_shot_bonus
         if random.random() < self.crit_chance:
-            damage *= 2  # Doble daño en crítico
+            damage *= 2.3  # Doble daño en crítico
         return damage
 
     def apply_quick_shots(self):
@@ -123,9 +123,12 @@ class Hunter:
         
         dps = total_damage / duration
         return dps
+    ####################################################
+
 
 @app.route('/')
 def index():
+    # Front Page
     return render_template('index.html')
 
 @app.route('/simulate', methods=['POST'])
