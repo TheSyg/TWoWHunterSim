@@ -48,35 +48,48 @@ class Hunter:
         return damage
 
     def apply_quick_shots(self):
+        # QS Proc logic, Imp Aspect of the Hawk
         if random.random() < self.quick_shots_chance:
-            self.quick_shots_active = True
-            self.quick_shots_time_left = self.quick_shots_duration
-            self.attack_speed *= 0.7  # Incremento del 30% en la velocidad de ataque
-            self.time_until_next_auto *= 0.7
+            print("QS Triggered!")
+            if self.quick_shots_active == True:
+                # QS already active, refreshes duration
+                self.quick_shots_active = True
+                self.quick_shots_time_left = self.quick_shots_duration
+            else:
+                # QS was not active. Buffs Attack Speed, adds duration.
+                self.quick_shots_active = True
+                self.quick_shots_time_left = self.quick_shots_duration
+                self.attack_speed /= 1.3
+                self.time_until_next_auto /= 1.3
 
     def update_quick_shots(self, elapsed_time):
+        # QS Logic
         if self.quick_shots_active:
             self.quick_shots_time_left -= elapsed_time
             if self.quick_shots_time_left <= 0:
+                # QS is over
                 self.quick_shots_active = False
-                self.attack_speed = self.base_attack_speed  # Revertir la velocidad de ataque al valor base
-                self.time_until_next_auto = self.base_attack_speed
+                self.attack_speed *= 1.3  # reverts Attack Speed
+                self.time_until_next_auto = self.attack_speed
 
     def apply_rapid_fire(self, current_time):
+        # Activates RF
         if current_time - self.rapid_fire_last_used >= self.rapid_fire_cd:
             self.rapid_fire_active = True
             self.rapid_fire_time_left = self.rapid_fire_duration
-            self.attack_speed *= 0.6  # Incremento del 40% en la velocidad de ataque
-            self.time_until_next_auto *= 0.6
+            self.attack_speed /= 1.4 # 40% AS increase
+            self.time_until_next_auto /= 1.4 
             self.rapid_fire_last_used = current_time
 
     def update_rapid_fire(self, elapsed_time):
+        # RF logic
         if self.rapid_fire_active:
             self.rapid_fire_time_left -= elapsed_time
             if self.rapid_fire_time_left <= 0:
+                # RF is over
                 self.rapid_fire_active = False
-                self.attack_speed = self.base_attack_speed  # Revertir la velocidad de ataque al valor base
-                self.time_until_next_auto = self.base_attack_speed
+                self.attack_speed *= 1.4 # reverts Attack Speed
+                self.time_until_next_auto = self.attack_speed
 
     def simulate_combat(self, duration):
         total_damage = 0

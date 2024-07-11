@@ -12,7 +12,7 @@
                 'TAQ_set': False,
                 't3': False}
 '''
-equipment_options = {
+slot = {
     'head': [
         #to do
     ],

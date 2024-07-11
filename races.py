@@ -2,15 +2,15 @@
 
 races = {
     # Alliance
-    {'Nelf': 135}, 
-    {'Dwarf': 126}, 
-    {'Gnome': 133}, 
-    {'Human': 130},
-    {'Helf': 127},
+    {'Nelf': 130}, 
+    {'Dwarf': 121}, 
+    {'Gnome': 128}, 
+    {'Human': 125},
+    {'Helf': 122},
     # Horde
-    {'Troll': 132},
-    {'Orc': 127},
-    {'Tauren': 125},
-    {'Undead': 128},
-    {'Goblin': 127}
+    {'Troll': 127},
+    {'Orc': 122},
+    {'Tauren': 120},
+    {'Undead': 123},
+    {'Goblin': 122}
 }
