@@ -20,12 +20,12 @@ class Hunter:
         self.quick_shots_chance = 0.05
         self.quick_shots_active = False
         self.quick_shots_time_left = 0
-        self.rapid_fire_cd = 300  # Cooldown de 5 minutos
-        self.rapid_fire_duration = 15  # Duración de 15 segundos
+        self.rapid_fire_cd = 300  # Cooldown RF
+        self.rapid_fire_duration = 15  # Duración RF
         self.rapid_fire_active = False
         self.rapid_fire_time_left = 0
         self.rapid_fire_last_used = -self.rapid_fire_cd  # Iniciar como si no se hubiera usado aún
-        self.multi_shot_cd = 10  # Cooldown de Multi-Shot
+        self.multi_shot_cd = 10  # CD de Multi-Shot
         self.multi_shot_last_used = -self.multi_shot_cd
         self.trueshot_cast_time = 1.0  # Tiempo de casteo de Trueshot
         self.time_until_next_auto = attack_speed  # Tiempo hasta el próximo auto disparo

@@ -1,16 +1,16 @@
-# wip, base agi for all races at lv 60
+# Base agi for each race at level 60
 
 races = {
     # Alliance
-    {'Nelf': 50}, 
-    {'Dwarf': 50}, 
-    {'Gnome': 50}, 
-    {'Human': 50},
-    {'Helf': 50},
+    {'Nelf': 135}, 
+    {'Dwarf': 126}, 
+    {'Gnome': 133}, 
+    {'Human': 130},
+    {'Helf': 127},
     # Horde
-    {'Troll': 50},
-    {'Orc': 50},
-    {'Tauren': 50},
-    {'Undead': 50},
-    {'Goblin': 50}
+    {'Troll': 132},
+    {'Orc': 127},
+    {'Tauren': 125},
+    {'Undead': 128},
+    {'Goblin': 127}
 }
