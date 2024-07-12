@@ -1,19 +1,20 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
+from equipment import equipment_options
 import random
 
 app = Flask(__name__)
 
 class Hunter:
-    def __init__(self, min_damage, max_damage, weapon_speed, attack_speed, ranged_attack_power, scope_bonus, ammo_dps, crit_chance):
-        self.min_damage = min_damage
-        self.max_damage = max_damage
-        self.weapon_speed = weapon_speed
-        self.base_attack_speed = attack_speed
-        self.attack_speed = attack_speed
-        self.ranged_attack_power = ranged_attack_power
-        self.scope_bonus = scope_bonus
-        self.ammo_dps = ammo_dps
-        self.crit_chance = crit_chance / 100
+    def __init__(self, race, weapon_skill, equipment):
+        self.equipment = equipment
+        self.base_agility = self.get_base_agility(race)
+        self.base_attack_power = 110
+        self.base_crit_chance = 0.05  # 5% base crit chance
+        self.hit_chance = 0
+        self.weapon_skill = weapon_skill
+        self.miss_chance = 0.09 if not weapon_skill else 0.06
+        self.scope_bonus = 0
+        self.ammo_dps = 0
         self.trueshot_bonus = 50
         self.multi_shot_bonus = 172
         self.quick_shots_duration = 12
@@ -28,12 +29,60 @@ class Hunter:
         self.multi_shot_cd = 10  # CD de Multi-Shot
         self.multi_shot_last_used = -self.multi_shot_cd
         self.trueshot_cast_time = 1.0  # Tiempo de casteo de Trueshot
-        self.time_until_next_auto = attack_speed  # Tiempo hasta el próximo auto disparo
+        self.time_until_next_auto = 0  # Tiempo hasta el próximo auto disparo
         self.trueshot_used = False  # Indica si Trueshot ya fue usado entre auto disparos
 
+        self.process_equipment()
+
+    def get_base_agility(self, race):
+        base_agility = {
+            'night_elf': 130,
+            'dwarf': 121,
+            'gnome': 128,
+            'human': 125,
+            'high_elf': 122,
+            'troll': 127,
+            'orc': 122,
+            'tauren': 120,
+            'undead': 123,
+            'goblin': 122
+        }
+        return base_agility.get(race.lower(), 0)
+
+    def process_equipment(self):
+        self.attack_power = self.base_attack_power
+        self.agility = self.base_agility
+        self.crit_chance = self.base_crit_chance
+        self.hit_chance = 0
+        self.haste = 0
+
+        for item in self.equipment.values():
+            self.agility += item.get('agility', 0)
+            self.attack_power += item.get('attack_power', 0)
+            self.crit_chance += item.get('crit_chance', 0) / 100
+            self.hit_chance += item.get('hit', 0) / 100
+            self.haste += item.get('haste', 0) / 100
+
+            # If the item is a ranged weapon, set weapon stats
+            if item.get('slot') == 'ranged':
+                self.min_damage = item.get('min_damage', 0)
+                self.max_damage = item.get('max_damage', 0)
+                self.weapon_speed = item.get('weapon_speed', 0)
+
+            # If the item is ammo, set ammo DPS
+            if item.get('slot') == 'ammo':
+                self.ammo_dps = item.get('ammo_dps', 0)
+            
+            # If the item is ammo bag, set haste bonus
+            if item.get('slot') == 'ammo_bag':
+                self.haste += item.get('haste', 0) / 100
+
+        self.attack_power += self.agility * 2
+        self.crit_chance += self.agility / 53
+
     def calculate_damage_range(self):
-        min_range = (((self.min_damage + self.scope_bonus) / self.weapon_speed) + (self.ranged_attack_power / 14) + self.ammo_dps) * self.weapon_speed
-        max_range = (((self.max_damage + self.scope_bonus) / self.weapon_speed) + (self.ranged_attack_power / 14) + self.ammo_dps) * self.weapon_speed
+        min_range = (((self.min_damage + self.scope_bonus) / self.weapon_speed) + (self.attack_power / 14) + self.ammo_dps) * self.weapon_speed
+        max_range = (((self.max_damage + self.scope_bonus) / self.weapon_speed) + (self.attack_power / 14) + self.ammo_dps) * self.weapon_speed
         return min_range, max_range
 
     def calculate_shot_damage(self, trueshot=False, multi_shot=False):
@@ -48,121 +97,77 @@ class Hunter:
         return damage
 
     def apply_quick_shots(self):
-        # QS Proc logic, Imp Aspect of the Hawk
         if random.random() < self.quick_shots_chance:
-            print("QS Triggered!")
-            if self.quick_shots_active == True:
-                # QS already active, refreshes duration
-                self.quick_shots_active = True
+            if self.quick_shots_active:
                 self.quick_shots_time_left = self.quick_shots_duration
             else:
-                # QS was not active. Buffs Attack Speed, adds duration.
                 self.quick_shots_active = True
                 self.quick_shots_time_left = self.quick_shots_duration
                 self.attack_speed /= 1.3
                 self.time_until_next_auto /= 1.3
 
-    def update_quick_shots(self, elapsed_time):
-        # QS Logic
+    def update_quick_shots(self, delta_time):
         if self.quick_shots_active:
-            self.quick_shots_time_left -= elapsed_time
+            self.quick_shots_time_left -= delta_time
             if self.quick_shots_time_left <= 0:
-                # QS is over
                 self.quick_shots_active = False
-                self.attack_speed *= 1.3  # reverts Attack Speed
-                self.time_until_next_auto = self.attack_speed
+                self.attack_speed *= 1.3
+                self.time_until_next_auto *= 1.3
 
-    def apply_rapid_fire(self, current_time):
-        # Activates RF
-        if current_time - self.rapid_fire_last_used >= self.rapid_fire_cd:
-            self.rapid_fire_active = True
-            self.rapid_fire_time_left = self.rapid_fire_duration
-            self.attack_speed /= 1.4 # 40% AS increase
-            self.time_until_next_auto /= 1.4 
-            self.rapid_fire_last_used = current_time
-
-    def update_rapid_fire(self, elapsed_time):
-        # RF logic
+    def update_rapid_fire(self, delta_time):
         if self.rapid_fire_active:
-            self.rapid_fire_time_left -= elapsed_time
+            self.rapid_fire_time_left -= delta_time
             if self.rapid_fire_time_left <= 0:
-                # RF is over
                 self.rapid_fire_active = False
-                self.attack_speed *= 1.4 # reverts Attack Speed
-                self.time_until_next_auto = self.attack_speed
+                self.attack_speed *= 1.4
+                self.time_until_next_auto *= 1.4
 
-    def simulate_combat(self, duration):
+    def simulate(self, duration):
+        current_time = 0
         total_damage = 0
-        time = 0
-        while time < duration:
-            # Activar Rapid Fire si es posible
-            self.apply_rapid_fire(time)
-            
-            # Aplicar Quick Shots
-            self.apply_quick_shots()
 
-            if time - self.multi_shot_last_used >= self.multi_shot_cd and not self.trueshot_used:
-                # Multi-Shot
-                damage = self.calculate_shot_damage(multi_shot=True)
+        while current_time < duration:
+            delta_time = 0.1  # Simulate in 0.1s intervals
+
+            # Apply buffs
+            self.update_quick_shots(delta_time)
+            self.update_rapid_fire(delta_time)
+
+            # Check if it's time to auto-shot
+            if self.time_until_next_auto <= 0:
+                if random.random() < self.miss_chance - self.hit_chance:
+                    damage = 0
+                else:
+                    damage = self.calculate_shot_damage()
                 total_damage += damage
-                self.multi_shot_last_used = time
-                elapsed_time = 0  # No tiene tiempo de casteo
-                self.trueshot_used = True  # Marcar Multi-Shot como una habilidad usada
-            elif self.time_until_next_auto <= 0:
-                # Auto Disparo
-                damage = self.calculate_shot_damage()
-                total_damage += damage
-                elapsed_time = self.attack_speed
-                self.time_until_next_auto = self.attack_speed
-                self.trueshot_used = False  # Resetear el uso de Trueshot
-            elif not self.trueshot_used and not (self.quick_shots_active and self.rapid_fire_active):
-                # Trueshot (solo si ambos buffs no están activos)
-                damage = self.calculate_shot_damage(trueshot=True)
-                total_damage += damage
-                elapsed_time = self.trueshot_cast_time
-                self.time_until_next_auto -= self.trueshot_cast_time
-                self.trueshot_used = True  # Marcar Trueshot como usado
-            else:
-                # Esperar al siguiente auto disparo
-                elapsed_time = self.time_until_next_auto
-                self.time_until_next_auto = 0
-            
-            time += elapsed_time
-            
-            # Actualizar estado de Quick Shots
-            self.update_quick_shots(elapsed_time)
-            # Actualizar estado de Rapid Fire
-            self.update_rapid_fire(elapsed_time)
-        
+                self.apply_quick_shots()
+                self.time_until_next_auto = self.weapon_speed / (1 + self.haste)
+
+                # If rapid fire is off cooldown, activate it
+                if current_time - self.rapid_fire_last_used >= self.rapid_fire_cd:
+                    self.rapid_fire_active = True
+                    self.rapid_fire_time_left = self.rapid_fire_duration
+                    self.attack_speed /= 1.4
+                    self.time_until_next_auto /= 1.4
+                    self.rapid_fire_last_used = current_time
+
+            self.time_until_next_auto -= delta_time
+            current_time += delta_time
+
         dps = total_damage / duration
         return dps
-    ####################################################
-
-
-@app.route('/')
-def index():
-    # Front Page
-    return render_template('index.html')
 
 @app.route('/simulate', methods=['POST'])
 def simulate():
     data = request.json
-    # Ensure no negative values
-    for key in data:
-        if data[key] < 0:
-            return jsonify({'error': 'Negative values are not allowed'}), 400
+    race = data.get('race')
+    weapon_skill = data.get('weapon_skill')
+    duration = int(data.get('duration'))
+    equipment = data.get('equipment', {})
 
-    hunter = Hunter(
-        min_damage=data['min_damage'],
-        max_damage=data['max_damage'],
-        weapon_speed=data['weapon_speed'],
-        attack_speed=data['attack_speed'],
-        ranged_attack_power=data['ranged_attack_power'],
-        scope_bonus=data['scope_bonus'],
-        ammo_dps=data['ammo_dps'],
-        crit_chance=data['crit_chance']
-    )
-    dps = hunter.simulate_combat(data['duration'])
+    hunter = Hunter(race, weapon_skill, equipment)
+    dps = hunter.simulate(duration)
+    
     return jsonify({'dps': dps})
 
 if __name__ == '__main__':

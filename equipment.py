@@ -12,7 +12,7 @@
                 'TAQ_set': False,
                 't3': False}
 '''
-slot = {
+equipment_options = {
     'head': [
         #to do
     ],
@@ -162,11 +162,44 @@ slot = {
          'TAQ_set': False,
          't3': False},
         ##########
-        {'name': 'Wyrmhide Spaulders', 'attack_power': 0, 'agility': 0, 'crit_chance': 0, 'haste': 0, 'hit': 2},
+        {'name': 'Wyrmhide Spaulders', 
+         'attack_power': 0,
+         'agility': 0,
+         'crit_chance': 0,
+         'haste': 0,
+         'hit': 2,
+         't1': False, 
+         'ZG_set': False, 
+         'RAQ_set':False,
+         't2': False,
+         'TAQ_set': False,
+         't3': False},
         ##########
-        {'name': 'Wyrmtongue Shoulders', 'attack_power': 0, 'agility': 23, 'crit_chance': 0, 'haste': 0, 'hit': 0},
+        {'name': 'Wyrmtongue Shoulders',
+         'attack_power': 0,
+         'agility': 23,
+         'crit_chance': 0,
+         'haste': 0,
+         'hit': 0,
+         't1': False, 
+         'ZG_set': False, 
+         'RAQ_set':False,
+         't2': False,
+         'TAQ_set': False,
+         't3': False},
         ##########
-        {'name': 'Shoulderguards of True Flight', 'attack_power': x, 'agility': x, 'crit_chance': x, 'haste': x, 'hit': 0}
+        {'name': 'Shoulderpads of True Flight',
+         'attack_power': 0,
+         'agility': 18,
+         'crit_chance': 0,
+         'haste': 0,
+         'hit': 1,
+         't1': False, 
+         'ZG_set': False, 
+         'RAQ_set':False,
+         't2': False,
+         'TAQ_set': False,
+         't3': False}
         ##########
     ],
     'back':[
@@ -197,7 +230,7 @@ slot = {
         #to do
     ],
     'melee':[
-        {'name': 'Fang of the Faceless', 'AP': 28, 'crit_chance': 1, '2h': False}
+        {'name': 'Fang of the Faceless', 'AP': 28, 'crit_chance': 1, '2h': False},
         {'name': 'Zin\'Rokh, Destroyer of Worlds', 'AP': 72, '2H': True}
     ],
     'ranged':[
