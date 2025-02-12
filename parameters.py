@@ -18,10 +18,9 @@ stats = {
 active_trinkets = []
 # Examples
 # active_trinkets = ["Earthstrike", "Jom Gabbar"]
-# active_trinkets = ["Devilsaur Eye"]  # Example: One activatable trinket
-# active_trinkets = []  # Example: No activatable trinkets
+# active_trinkets = ["Devilsaur Eye"] One activable trinket
+# active_trinkets = [] No activable trinkets
 # List of supported trinkets: Devilsaur Eye, Earthstrike, Jom Gabbar, Kiss of the Spider, Slayer's Crest
-
 
 #################################
 # Ignore if no active trinkets are set up. Make sure to input the correct stats above.

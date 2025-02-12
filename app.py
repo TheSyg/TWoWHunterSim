@@ -109,7 +109,7 @@ class Hunter:
             
             # If Feign Death is still on cooldown, wait and swap as soon as it's ready
             elif self.debug:
-                print(f"⏳ Waiting for Feign Death (on cooldown) at {current_time}s")
+                print(f"Waiting for Feign Death (on cooldown) at {current_time}s")
 
     def calculate_damage_range(self):
         """Calculates damage range with trinket buffs applied."""
@@ -129,6 +129,7 @@ class Hunter:
     def simulate(self, duration):
         """Runs the simulation and returns the average DPS."""
         total_dps = 0
+        print("Simming...")
         for _ in range(self.num_simulations):
             current_time = 0
             total_damage = 0
